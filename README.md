@@ -1,2 +1,3 @@
-# helios
-Setup of the primary homelab setup server
+# HELIOS
+This is the setup of the primary, central homelab setup server.
+
