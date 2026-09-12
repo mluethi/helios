@@ -1,0 +1,23 @@
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+[Unit]
+Description=Caddy Reverse Proxy
+After=network-online.target
+
+[Container]
+Image=docker.io/library/caddy:2
+PublishPort=80:80
+PublishPort=443:443
+# :Z ist SELinux und nicht optional - ohne das darf der Container die Datei
+# nicht lesen, und die Meldung lautet nur "Permission denied".
+Volume=%h/caddy/Caddyfile:/etc/caddy/Caddyfile:Z,ro
+# Hier liegt die Zertifizierungsstelle, die Caddy selbst betreibt. Geht das
+# Volume verloren, erzeugt Caddy eine neue CA und jedes Geraet warnt wieder.
+Volume=caddy-data:/data:Z
+Volume=caddy-config:/config:Z
+Network={{ helios_netzwerk }}.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

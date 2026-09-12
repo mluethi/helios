@@ -1,0 +1,8 @@
+# Podman-Netzwerk, ueber das sich die Container beim Namen finden.
+[Unit]
+Description=Netzwerk fuer die HELIOS-Dienste
+
+[Network]
+
+[Install]
+WantedBy=default.target

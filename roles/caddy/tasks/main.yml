@@ -1,0 +1,47 @@
+---
+# Caddy als Reverse Proxy, rootless. Laeuft bewusst OHNE become - die Quadlets
+# gehoeren dem Benutzer und liegen unter ~/.config/containers/systemd/.
+
+- name: Verzeichnis fuer die Quadlets anlegen
+  ansible.builtin.file:
+    path: "~/.config/containers/systemd"
+    state: directory
+    mode: "0755"
+
+- name: Verzeichnis fuer die Caddy-Konfiguration anlegen
+  ansible.builtin.file:
+    path: "~/caddy"
+    state: directory
+    mode: "0755"
+
+- name: Podman-Netzwerk als Quadlet
+  ansible.builtin.copy:
+    src: helios.network
+    dest: "~/.config/containers/systemd/{{ helios_netzwerk }}.network"
+    mode: "0644"
+  notify: systemd neu einlesen
+
+- name: Caddyfile schreiben
+  ansible.builtin.template:
+    src: Caddyfile.j2
+    dest: "~/caddy/Caddyfile"
+    mode: "0644"
+  notify: Caddy neu starten
+
+- name: Caddy als Quadlet
+  ansible.builtin.template:
+    src: caddy.container.j2
+    dest: "~/.config/containers/systemd/caddy.container"
+    mode: "0644"
+  notify: systemd neu einlesen
+
+# Quadlets werden erst nach daemon-reload zu Units. Deshalb hier flushen,
+# bevor der Dienst gestartet wird.
+- name: Handler jetzt ausfuehren
+  ansible.builtin.meta: flush_handlers
+
+- name: Caddy starten
+  ansible.builtin.systemd_service:
+    name: caddy
+    scope: user
+    state: started

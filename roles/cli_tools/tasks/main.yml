@@ -1,0 +1,18 @@
+---
+# Werkzeuge fuer die Kommandozeile. Eigene Rolle, damit sie spaeter auf jeder
+# Maschine ausgerollt werden kann.
+#
+# yadm fehlt in den Fedora-Paketquellen nicht, ist aber zu pruefen - falls das
+# Paket nicht existiert, bricht dnf ab und nennt den Namen.
+
+- name: CLI-Werkzeuge installieren
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - mc
+      - bat
+      - fzf
+      - zoxide
+      - yadm
+      - direnv
+    state: present

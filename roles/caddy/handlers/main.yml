@@ -1,0 +1,13 @@
+---
+- name: systemd neu einlesen
+  ansible.builtin.systemd_service:
+    scope: user
+    daemon_reload: true
+
+- name: Caddy neu starten
+  ansible.builtin.systemd_service:
+    name: caddy
+    scope: user
+    state: restarted
+  # Beim allerersten Lauf gibt es die Unit noch nicht - dann ist das kein Fehler.
+  failed_when: false

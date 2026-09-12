@@ -1,0 +1,30 @@
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+#
+# "tls internal": Caddy betreibt eine eigene Zertifizierungsstelle auf HELIOS.
+# Kein ACME, kein API-Token, kein Internet noetig. Preis: Das Wurzelzertifikat
+# muss einmal pro Geraet importiert werden. Siehe README.
+
+{{ helios_dienste_namen.cockpit }} {
+    tls internal
+    # Cockpit laeuft auf dem Host, nicht im Container. Aus dem Container heraus
+    # ist der Host ueber host.containers.internal erreichbar - "localhost" waere
+    # der Caddy-Container selbst.
+    reverse_proxy host.containers.internal:9090
+}
+
+# --- Welle 2, sobald die Dienste laufen ---
+#
+# forgejo.rubi {
+#     tls internal
+#     reverse_proxy forgejo:3000
+# }
+#
+# vault.rubi {
+#     tls internal
+#     reverse_proxy vaultwarden:80
+# }
+#
+# arcane.rubi {
+#     tls internal
+#     reverse_proxy arcane:3000
+# }

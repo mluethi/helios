@@ -1,0 +1,16 @@
+---
+# Grundwerte fuer HELIOS. Keine Geheimnisse - dieses Repo ist oeffentlich.
+
+helios_benutzer: marcello
+helios_hostname: helios.rubi
+
+# Interne Namen. Jeder braucht einen Host-Override im Unbound der OPNsense,
+# alle auf dieselbe IP.
+helios_dienste_namen:
+  cockpit: helios.rubi
+
+# Podman-Netzwerk, ueber das sich die Container spaeter beim Namen finden.
+helios_netzwerk: helios
+
+# Port, ab dem rootless Container lauschen duerfen. Caddy braucht 80.
+helios_port_start: 80

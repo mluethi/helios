@@ -1,0 +1,72 @@
+---
+# System-Grundlagen. Braucht root - deshalb ueberall "become".
+
+- name: Pakete installieren
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - podman
+      - cockpit
+      - cockpit-podman
+      - git-core
+      - policycoreutils-python-utils   # semanage, fuer SELinux-Probleme
+      - tmux
+    state: present
+
+- name: Cockpit aktivieren
+  become: true
+  ansible.builtin.systemd_service:
+    name: cockpit.socket
+    enabled: true
+    state: started
+
+# Rootless-Container duerfen standardmaessig keine Ports unter 1024 belegen.
+# Caddy braucht 80 und 443. Ohne diese Datei startet Caddy nicht - und die
+# Fehlermeldung nennt den Grund nicht.
+- name: Privilegierte Ports fuer rootless freigeben
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/99-rootless-ports.conf
+    content: "net.ipv4.ip_unprivileged_port_start={{ helios_port_start }}\n"
+    owner: root
+    group: root
+    mode: "0644"
+  register: sysctl_datei
+
+- name: sysctl neu einlesen
+  become: true
+  ansible.builtin.command:
+    cmd: sysctl --system
+  when: sysctl_datei.changed
+  changed_when: true
+
+# Ohne linger beendet systemd alle Container des Benutzers, sobald die
+# SSH-Sitzung endet.
+- name: Dienste des Benutzers ohne Anmeldung laufen lassen
+  become: true
+  ansible.builtin.command:
+    cmd: "loginctl enable-linger {{ helios_benutzer }}"
+    creates: "/var/lib/systemd/linger/{{ helios_benutzer }}"
+
+# Cockpit prueft die Herkunft der Anfrage und weist den Reverse Proxy sonst ab.
+# Die Fehlermeldung klingt nicht nach ihrer Ursache.
+- name: Cockpit hinter dem Reverse Proxy erlauben
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/cockpit/cockpit.conf
+    content: |
+      [WebService]
+      Origins = https://{{ helios_hostname }} https://{{ helios_hostname }}:443
+      ProtocolHeader = X-Forwarded-Proto
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Cockpit neu starten
+
+# Der Socket wird von Arcane gebraucht (Welle 2) und schadet vorher nicht.
+- name: Podman-Socket des Benutzers aktivieren
+  ansible.builtin.systemd_service:
+    name: podman.socket
+    scope: user
+    enabled: true
+    state: started

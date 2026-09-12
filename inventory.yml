@@ -1,0 +1,5 @@
+# HELIOS richtet sich selbst ein - ansible-pull laeuft lokal.
+all:
+  hosts:
+    localhost:
+      ansible_connection: local
