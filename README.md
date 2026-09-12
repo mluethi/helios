@@ -44,15 +44,6 @@ die Container rootless unter `marcello` laufen.
 **Ein Vault-Passwort braucht es in Welle 1 noch nicht** – es gibt noch keine
 Geheimnisse. Ab Welle 2 (Forgejo, VaultWarden) kommt `--ask-vault-pass` dazu.
 
-### Wenn die Dateien noch auf einem Branch liegen
-
-`ansible-pull` nimmt standardmässig `main`. Solange dieser Stand auf
-`claude/erstaufbau` liegt:
-
-```bash
-ansible-pull -U https://github.com/mluethi/helios.git -C claude/erstaufbau bootstrap.yml -K
-```
-
 ## Was das Playbook tut
 
 | Rolle | läuft als | Inhalt |
