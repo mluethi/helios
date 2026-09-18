@@ -4,3 +4,11 @@
   ansible.builtin.systemd_service:
     name: cockpit.socket
     state: restarted
+
+# firewall-cmd --permanent schreibt nur die Konfiguration; erst --reload
+# uebernimmt sie in die laufende Firewall.
+- name: Firewall neu laden
+  become: true
+  ansible.builtin.command:
+    cmd: firewall-cmd --reload
+  changed_when: true

@@ -77,6 +77,33 @@
     mode: "0644"
   notify: Cockpit neu starten
 
+# Fedora Server bringt firewalld mit, und dessen Standardzone laesst nur ssh,
+# cockpit und dhcpv6-client durch. Caddy horcht zwar auf 80 und 443, aber von
+# aussen kommt nichts an - auf der Maschine selbst laeuft der Verkehr ueber die
+# Loopback-Schnittstelle und wird nicht gefiltert. Deshalb funktionierte curl
+# auf HELIOS und der Browser vom Mac nicht (18.09.2026).
+#
+# ansible.posix.firewalld waere das passende Modul, steckt aber in einer
+# Galaxy-Collection - siehe ansible.cfg. Also firewall-cmd von Hand, idempotent
+# ueber die Abfrage davor.
+- name: Freigegebene Dienste der Firewall abfragen
+  become: true
+  ansible.builtin.command:
+    cmd: firewall-cmd --permanent --list-services
+  changed_when: false
+  register: firewall_dienste
+
+- name: HTTP und HTTPS in der Firewall freigeben
+  become: true
+  ansible.builtin.command:
+    cmd: "firewall-cmd --permanent --add-service={{ item }}"
+  loop:
+    - http
+    - https
+  when: item not in firewall_dienste.stdout.split()
+  changed_when: true
+  notify: Firewall neu laden
+
 # Der Socket wird von Arcane gebraucht (Welle 2) und schadet vorher nicht.
 - name: Podman-Socket des Benutzers aktivieren
   ansible.builtin.systemd_service:
