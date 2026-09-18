@@ -2,8 +2,14 @@
 # Werkzeuge fuer die Kommandozeile. Eigene Rolle, damit sie spaeter auf jeder
 # Maschine ausgerollt werden kann.
 #
-# yadm fehlt in den Fedora-Paketquellen nicht, ist aber zu pruefen - falls das
-# Paket nicht existiert, bricht dnf ab und nennt den Namen.
+# yadm ist am 18.09.2026 herausgeflogen: Das Paket gibt es in Fedora nicht -
+# weder in 44 noch ueberhaupt (packages.fedoraproject.org antwortet mit 404).
+# dnf bricht bei einem unbekannten Paket ab und nimmt die ganze Liste mit, also
+# wurde auch keines der uebrigen fuenf installiert.
+#
+# Die Liste stammt aus einem Video und war nie gegen die Paketquellen geprueft.
+# Ein Ersatz fuer die Dotfiles-Verwaltung ist noch nicht entschieden; chezmoi
+# waere in Fedora 44 vorhanden und macht dasselbe.
 
 - name: CLI-Werkzeuge installieren
   become: true
@@ -13,6 +19,5 @@
       - bat
       - fzf
       - zoxide
-      - yadm
       - direnv
     state: present
