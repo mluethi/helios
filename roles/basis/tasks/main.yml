@@ -50,6 +50,19 @@
 
 # Cockpit prueft die Herkunft der Anfrage und weist den Reverse Proxy sonst ab.
 # Die Fehlermeldung klingt nicht nach ihrer Ursache.
+#
+# AllowUnencrypted ist am 18.09.2026 dazugekommen, nach einer
+# Umleitungsschleife: Cockpit horcht auf 9090 auf HTTP UND HTTPS und leitet
+# jede HTTP-Verbindung auf HTTPS um - ausser sie kommt von localhost. Caddy
+# spricht aber einfaches HTTP zu host.containers.internal, und das ist aus dem
+# Container heraus nicht localhost. Also: Cockpit leitet um, Caddy reicht die
+# Umleitung nach aussen, der Browser kommt zurueck - endlos.
+# ProtocolHeader allein genuegt dagegen nicht, nachgemessen am Geraet.
+#
+# Preis: Die Strecke Caddy -> Cockpit laeuft unverschluesselt. Sie fuehrt vom
+# Container zum Host ueber das Podman-Netz, nicht uebers LAN; nach aussen macht
+# Caddy TLS. Offen bleibt, dass Port 9090 im ganzen LAN erreichbar ist - siehe
+# das Erkenntnis-Journal im Homelab-Repo.
 - name: Cockpit hinter dem Reverse Proxy erlauben
   become: true
   ansible.builtin.copy:
@@ -58,6 +71,7 @@
       [WebService]
       Origins = https://{{ helios_hostname }} https://{{ helios_hostname }}:443
       ProtocolHeader = X-Forwarded-Proto
+      AllowUnencrypted = true
     owner: root
     group: root
     mode: "0644"
