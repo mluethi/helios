@@ -2,14 +2,15 @@
 # Werkzeuge fuer die Kommandozeile. Eigene Rolle, damit sie spaeter auf jeder
 # Maschine ausgerollt werden kann.
 #
-# yadm ist am 18.09.2026 herausgeflogen: Das Paket gibt es in Fedora nicht -
+# chezmoi steht hier anstelle von yadm: Das Paket yadm gibt es in Fedora nicht -
 # weder in 44 noch ueberhaupt (packages.fedoraproject.org antwortet mit 404).
-# dnf bricht bei einem unbekannten Paket ab und nimmt die ganze Liste mit, also
-# wurde auch keines der uebrigen fuenf installiert.
+# chezmoi loest dieselbe Aufgabe, die Dotfiles-Verwaltung, und ist in Fedora 44
+# vorhanden. Entschieden am 18.09.2026.
 #
-# Die Liste stammt aus einem Video und war nie gegen die Paketquellen geprueft.
-# Ein Ersatz fuer die Dotfiles-Verwaltung ist noch nicht entschieden; chezmoi
-# waere in Fedora 44 vorhanden und macht dasselbe.
+# Merksatz aus dem Vorfall: dnf bricht bei EINEM unbekannten Paket ab und nimmt
+# die ganze Liste mit - ein falscher Name verhindert alle. Jeden Namen gegen die
+# Paketquellen pruefen, bevor er hier landet; die urspruengliche Liste stammte
+# aus einem Video und war nie geprueft.
 
 - name: CLI-Werkzeuge installieren
   become: true
@@ -19,5 +20,6 @@
       - bat
       - fzf
       - zoxide
+      - chezmoi
       - direnv
     state: present

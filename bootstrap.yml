@@ -13,9 +13,13 @@
 
   pre_tasks:
     - name: Sicherstellen, dass das Playbook nicht als root laeuft
+      # ansible_facts['user_id'] statt ansible_user_id: Das automatische
+      # Einspeisen der Fakten als Variablen mit Praefix (INJECT_FACTS_AS_VARS)
+      # faellt in ansible-core 2.24 weg. Danach waere ansible_user_id leer -
+      # die Sicherung wuerde still nichts mehr pruefen.
       ansible.builtin.assert:
         that:
-          - ansible_user_id != 'root'
+          - ansible_facts['user_id'] != 'root'
         fail_msg: >-
           Dieses Playbook als normaler Benutzer starten, nicht als root -
           die Container laufen rootless und gehoeren diesem Benutzer.
