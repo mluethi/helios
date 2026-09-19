@@ -6,10 +6,21 @@
 
 {{ helios_dienste_namen.cockpit }} {
     tls internal
-    # Cockpit laeuft auf dem Host, nicht im Container. Aus dem Container heraus
-    # ist der Host ueber host.containers.internal erreichbar - "localhost" waere
-    # der Caddy-Container selbst.
-    reverse_proxy host.containers.internal:9090
+    # Cockpit laeuft auf dem Host, nicht im Container. "localhost" waere der
+    # Caddy-Container selbst, taugt hier also nicht.
+    #
+    # Hier stand host.containers.internal - Podmans Sonderadresse fuer den Host.
+    # Die ist bei rootless Podman mit pasta unzuverlaessig: Am 19.09.2026
+    # lieferte sie morgens noch eine 200 und mittags nur noch
+    # "dial tcp 169.254.1.2:9090: i/o timeout". Ein Neustart des Containers half
+    # nicht, die Firewall war es nicht - aus dem Container heraus war
+    # 169.254.1.2 schlicht nicht erreichbar, 192.168.1.20 dagegen schon.
+    #
+    # Deshalb der gewoehnliche Hostname: Der Container loest ihn ueber den
+    # Resolver des Hosts auf, und der Verkehr laeuft als Maschine-zu-sich-selbst
+    # ueber Loopback - ungefiltert, ohne Firewall-Regel. Keine IP im Repo, und
+    # es ueberlebt einen Adresswechsel.
+    reverse_proxy {{ helios_hostname }}:9090
 }
 
 {{ helios_dienste_namen.homepage }} {
