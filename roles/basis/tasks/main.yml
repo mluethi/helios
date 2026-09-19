@@ -104,6 +104,28 @@
   changed_when: true
   notify: Firewall neu laden
 
+# Fedora Server gibt Cockpit von sich aus im ganzen LAN frei (Port 9090). Seit
+# AllowUnencrypted leitet Cockpit dort nicht mehr auf HTTPS um - wer
+# http://helios.rubi:9090 aufruft, schickt sein Passwort im Klartext. Der Weg
+# ueber Caddy (https://helios.rubi) ist erprobt, also faellt die direkte
+# Freigabe weg.
+#
+# Caddy trifft das nicht: Es waehlt im Container host.containers.internal
+# (169.254.1.2), und pasta baut daraus auf dem Host eine Verbindung
+# 192.168.1.20 -> 192.168.1.20:9090 auf. Maschine zu sich selbst, also ueber
+# Loopback - und Loopback wird nicht gefiltert. Am 19.09.2026 gemessen und
+# nach der Aenderung nachgeprueft: Caddy 200, Port 9090 von aussen abgelehnt.
+#
+# ACHTUNG: Cockpit horcht weiterhin auf *:9090. Der Schutz ist allein die
+# Firewall - und die haengt an der Zone, die Zone an der Schnittstelle.
+- name: Direkte Freigabe von Cockpit zuruecknehmen
+  become: true
+  ansible.builtin.command:
+    cmd: firewall-cmd --permanent --remove-service=cockpit
+  when: "'cockpit' in firewall_dienste.stdout.split()"
+  changed_when: true
+  notify: Firewall neu laden
+
 # Der Socket wird von Arcane gebraucht (Welle 2) und schadet vorher nicht.
 - name: Podman-Socket des Benutzers aktivieren
   ansible.builtin.systemd_service:
