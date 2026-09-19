@@ -11,6 +11,15 @@
       - git-core
       - policycoreutils-python-utils   # semanage, fuer SELinux-Probleme
       - tmux
+      # Performance Co-Pilot. pmcd sammelt Systemkennzahlen, pmlogger schreibt
+      # sie in lokale Archive - daraus zeichnet Cockpit "Metriken und Verlauf".
+      # Ohne PCP zeigt Cockpit nur Momentanwerte, keinen Verlauf.
+      #
+      # Auf Fedora 44 gibt es KEIN Paket "cockpit-pcp" - das nennen nur aeltere
+      # Anleitungen. Am 19.09.2026 gegen Fedoras mdapi geprueft, und ein
+      # falscher Name laesst dnf die ganze Liste abbrechen.
+      - pcp
+      - pcp-zeroconf                   # dichtere Messfolge, fertige Konfigs
     state: present
 
 - name: Cockpit aktivieren
@@ -125,6 +134,20 @@
   when: "'cockpit' in firewall_dienste.stdout.split()"
   changed_when: true
   notify: Firewall neu laden
+
+# pmproxy stellt die Kennzahlen ueber eine REST-Schnittstelle auf Port 44322
+# bereit; Cockpit liest sie von dort. Bewusst NICHT in der Firewall
+# freigegeben - gebraucht wird sie nur lokal.
+- name: Dienste des Performance Co-Pilot aktivieren
+  become: true
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: true
+    state: started
+  loop:
+    - pmcd
+    - pmlogger
+    - pmproxy
 
 # Der Socket wird von Arcane gebraucht (Welle 2) und schadet vorher nicht.
 - name: Podman-Socket des Benutzers aktivieren
