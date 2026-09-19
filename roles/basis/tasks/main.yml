@@ -173,6 +173,26 @@
     - pmlogger
     - pmproxy
 
+# Eine ansible.cfg gilt nur dort, wo Ansible sie findet: ANSIBLE_CONFIG, das
+# aktuelle Verzeichnis, ~/.ansible.cfg, /etc/ansible/. ansible-pull findet die
+# des Repos, weil es selbst in die Arbeitskopie wechselt - ein Aufruf von Hand
+# aus dem Home findet sie NICHT und fragt dann nach dem Vault-Passwort, obwohl
+# die Datei laengst da ist.
+#
+# ACHTUNG: Ansible mischt diese Dateien nicht. Die erste gefundene gilt ganz.
+# Beim ansible-pull gewinnt also weiterhin die des Repos; diese hier greift nur
+# bei Aufrufen von Hand ausserhalb der Arbeitskopie.
+- name: ansible.cfg im Home fuer Aufrufe von Hand
+  ansible.builtin.copy:
+    dest: "~/.ansible.cfg"
+    content: |
+      # Von Ansible erzeugt - Aenderungen gehen beim naechsten Lauf verloren.
+      # Gilt nur fuer Aufrufe von Hand; beim ansible-pull gewinnt die
+      # ansible.cfg der Arbeitskopie.
+      [defaults]
+      vault_password_file = ~/.vault_pass
+    mode: "0644"
+
 # Der Socket wird von Arcane gebraucht (Welle 2) und schadet vorher nicht.
 - name: Podman-Socket des Benutzers aktivieren
   ansible.builtin.systemd_service:
