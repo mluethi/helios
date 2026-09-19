@@ -12,19 +12,26 @@
     reverse_proxy host.containers.internal:9090
 }
 
+{{ helios_dienste_namen.homepage }} {
+    tls internal
+    # Container im selben Podman-Netzwerk finden sich ueber ihren Namen. Der
+    # steht als ContainerName im Quadlet - ohne ihn hiesse er systemd-homepage.
+    reverse_proxy homepage:3000
+}
+
 # --- Welle 2, sobald die Dienste laufen ---
 #
-# forgejo.rubi {
+# {{ helios_dienste_namen.forgejo }} {
 #     tls internal
 #     reverse_proxy forgejo:3000
 # }
 #
-# vault.rubi {
+# {{ helios_dienste_namen.vaultwarden }} {
 #     tls internal
 #     reverse_proxy vaultwarden:80
 # }
 #
-# arcane.rubi {
+# {{ helios_dienste_namen.arcane }} {
 #     tls internal
 #     reverse_proxy arcane:3000
 # }

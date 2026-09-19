@@ -1,0 +1,27 @@
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+[Unit]
+Description=Homepage - Startseite fuer die Dienste
+After=network-online.target
+
+[Container]
+Image=ghcr.io/gethomepage/homepage:latest
+# ContainerName ist noetig, nicht Kosmetik: Quadlet nennt den Container sonst
+# "systemd-homepage", und genau diesen Namen muesste dann das Caddyfile
+# ansprechen. So heisst er wie der Dienst - und Caddy findet ihn ueber die
+# DNS-Aufloesung des Podman-Netzwerks.
+ContainerName=homepage
+# Kein PublishPort: Homepage ist ausschliesslich ueber Caddy erreichbar. Was
+# nicht im LAN horcht, muss auch nicht in der Firewall stehen.
+Volume=%h/homepage:/app/config:Z
+# Pflicht seit Homepage 1.0: ohne diese Zeile weist Homepage jede Anfrage mit
+# einem Host-Validierungsfehler ab. Ohne Schema, ohne Port - nur der Name.
+# Der Wert "*" wuerde die Pruefung abschalten und ist ausdruecklich nicht
+# empfohlen.
+Environment=HOMEPAGE_ALLOWED_HOSTS={{ helios_dienste_namen.homepage }}
+Network={{ helios_netzwerk }}.network
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target

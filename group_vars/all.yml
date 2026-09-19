@@ -8,6 +8,11 @@ helios_hostname: helios.rubi
 # alle auf dieselbe IP.
 helios_dienste_namen:
   cockpit: helios.rubi
+  homepage: home.rubi
+  # Welle 2, Host-Overrides am 19.09.2026 angelegt, Dienste noch nicht gebaut:
+  forgejo: forgejo.rubi
+  vaultwarden: vault.rubi
+  arcane: arcane.rubi
 
 # Podman-Netzwerk, ueber das sich die Container spaeter beim Namen finden.
 helios_netzwerk: helios

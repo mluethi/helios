@@ -28,4 +28,5 @@
   roles:
     - basis
     - caddy
+    - homepage
     - cli_tools
