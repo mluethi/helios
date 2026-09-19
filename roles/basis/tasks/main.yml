@@ -113,6 +113,30 @@
   changed_when: true
   notify: Firewall neu laden
 
+# Cockpit schreibt eine Zeile in die Anmeldemeldung, die auf
+#   "Web console: https://helios:9090/ or https://192.168.1.20:9090/"
+# verweist. Seit die direkte Freigabe von 9090 zurueckgenommen ist, ist keine
+# der beiden Adressen aus dem LAN erreichbar - die Meldung schickt also in die
+# Irre. /etc/motd.d/cockpit ist ein Symlink nach /run/cockpit/motd; die Datei
+# unter /run ist fluechtig und wird neu geschrieben, der Symlink im /etc ist
+# der richtige Hebel.
+- name: Irrefuehrende Cockpit-Zeile aus der Anmeldemeldung entfernen
+  become: true
+  ansible.builtin.file:
+    path: /etc/motd.d/cockpit
+    state: absent
+
+# Eine Anmeldemeldung, die den Weg nennt, der wirklich funktioniert. Loeschen
+# allein waere die halbe Loesung - die Zeile hatte ja einen Zweck.
+- name: Anmeldemeldung mit dem richtigen Weg zu Cockpit
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/motd.d/helios
+    content: "Cockpit: https://{{ helios_dienste_namen.cockpit }}/\n"
+    owner: root
+    group: root
+    mode: "0644"
+
 # Fedora Server gibt Cockpit von sich aus im ganzen LAN frei (Port 9090). Seit
 # AllowUnencrypted leitet Cockpit dort nicht mehr auf HTTPS um - wer
 # http://helios.rubi:9090 aufruft, schickt sein Passwort im Klartext. Der Weg
