@@ -28,12 +28,18 @@
     mode: "0644"
   notify: Caddy neu starten
 
+# Auch "Caddy neu starten" benachrichtigen, nicht nur neu einlesen: Ein
+# daemon-reload macht aus der geaenderten Datei zwar wieder eine Unit, aber der
+# laufende Container bleibt auf dem alten Image. Ohne Neustart wuerde eine
+# geaenderte Version hier stehen und dort nicht laufen.
 - name: Caddy als Quadlet
   ansible.builtin.template:
     src: caddy.container.j2
     dest: "~/.config/containers/systemd/caddy.container"
     mode: "0644"
-  notify: systemd neu einlesen
+  notify:
+    - systemd neu einlesen
+    - Caddy neu starten
 
 # Quadlets werden erst nach daemon-reload zu Units. Deshalb hier flushen,
 # bevor der Dienst gestartet wird.

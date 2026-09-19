@@ -4,7 +4,7 @@ Description=Caddy Reverse Proxy
 After=network-online.target
 
 [Container]
-Image=docker.io/library/caddy:2
+Image={{ helios_images.caddy }}
 PublishPort=80:80
 PublishPort=443:443
 # :Z ist SELinux und nicht optional - ohne das darf der Container die Datei

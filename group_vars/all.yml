@@ -14,6 +14,20 @@ helios_dienste_namen:
   vaultwarden: vault.rubi
   arcane: arcane.rubi
 
+# Container-Images, exakt festgenagelt. Ein Neuaufbau soll dieselbe Maschine
+# ergeben und nicht nur eine aehnliche - darum geht es in Durchgang 2.
+#
+# "latest" heisst NICHT "immer aktuell", sondern "unbekannt": Ein Quadlet zieht
+# das Image nicht von selbst neu, ohne AutoUpdate laeuft weiter, was beim ersten
+# Mal geholt wurde. Der Tag sagt also nur, was der naechste Pull bringt.
+#
+# ACHTUNG beim Heben: Die Schreibweise der Tags ist nicht einheitlich. Caddy
+# schreibt "2.11.4", Homepage "v2.4.0" - mit v. Am 19.09.2026 gegen beide
+# Registries geprueft. Die dauerhafte Regel ist offen (F-59 im Homelab-Repo).
+helios_images:
+  caddy: docker.io/library/caddy:2.11.4
+  homepage: ghcr.io/gethomepage/homepage:v2.4.0
+
 # Podman-Netzwerk, ueber das sich die Container spaeter beim Namen finden.
 helios_netzwerk: helios
 

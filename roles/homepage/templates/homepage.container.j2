@@ -4,7 +4,7 @@ Description=Homepage - Startseite fuer die Dienste
 After=network-online.target
 
 [Container]
-Image=ghcr.io/gethomepage/homepage:latest
+Image={{ helios_images.homepage }}
 # ContainerName ist noetig, nicht Kosmetik: Quadlet nennt den Container sonst
 # "systemd-homepage", und genau diesen Namen muesste dann das Caddyfile
 # ansprechen. So heisst er wie der Dienst - und Caddy findet ihn ueber die
