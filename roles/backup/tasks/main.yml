@@ -1,0 +1,135 @@
+---
+# Sicherung mit restic auf die zweite Platte im Geraet.
+#
+# ACHTUNG, Einordnung: Eine zweite Platte im selben Gehaeuse ist KEIN richtiges
+# Backup - gegen Diebstahl, Feuer oder ein sterbendes Netzteil hilft sie nicht.
+# Sie ist hier das Ziel, an dem die Mechanik entsteht und der Rueckholtest
+# geprobt wird. Kommt eine externe Platte dazu, ist das Ziel eine Zeile in
+# group_vars; alles Uebrige bleibt.
+
+- name: Einhaengepunkt anlegen
+  become: true
+  ansible.builtin.file:
+    path: "{{ helios_backup_einhaengepunkt }}"
+    state: directory
+    mode: "0755"
+
+# ansible.posix.mount waere das passende Modul - steckt aber in einer
+# Galaxy-Collection, genau wie firewalld. Also von Hand, idempotent ueber die
+# UUID als regexp.
+#
+# UUID statt /dev/sda1: Geraetenamen haengen an der Erkennungsreihenfolge und
+# koennen wandern, die UUID nicht.
+#
+# nofail ist NICHT optional. Fehlt die Platte beim Start, liefe die Maschine
+# sonst in die Notfall-Konsole - ein Server, der wegen eines fehlenden
+# Backup-Ziels nicht mehr hochkommt, waere die Umkehrung des Zwecks.
+- name: Platte in die fstab eintragen
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/fstab
+    regexp: "^UUID={{ helios_backup_platte_uuid }}"
+    line: "UUID={{ helios_backup_platte_uuid }} {{ helios_backup_einhaengepunkt }} ext4 defaults,nofail,x-systemd.device-timeout=10 0 2"
+    validate: "findmnt --verify --tab-file %s"
+  register: fstab_eintrag
+
+# systemd erzeugt aus der fstab Mount-Units. Ohne daemon-reload kennt es den
+# neuen Eintrag beim naechsten Start nicht.
+- name: systemd die fstab neu einlesen lassen
+  become: true
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: fstab_eintrag.changed
+
+- name: Pruefen, ob die Platte eingehaengt ist
+  ansible.builtin.command:
+    cmd: "mountpoint -q {{ helios_backup_einhaengepunkt }}"
+  register: platte_eingehaengt
+  changed_when: false
+  failed_when: false
+
+- name: Platte einhaengen
+  become: true
+  ansible.builtin.command:
+    cmd: "mount {{ helios_backup_einhaengepunkt }}"
+  when: platte_eingehaengt.rc != 0
+  changed_when: true
+
+# Erst nach dem Einhaengen, sonst entstuende das Verzeichnis auf der
+# Systemplatte und waere nach dem Einhaengen verdeckt.
+- name: Verzeichnis fuer das restic-Repository
+  become: true
+  ansible.builtin.file:
+    path: "{{ helios_restic_repo }}"
+    state: directory
+    owner: "{{ helios_benutzer }}"
+    group: "{{ helios_benutzer }}"
+    mode: "0700"
+
+- name: Verzeichnis fuer die restic-Konfiguration
+  ansible.builtin.file:
+    path: "~/.config/restic"
+    state: directory
+    mode: "0700"
+
+# no_log: true ist hier Pflicht - ohne das stuende das entschluesselte Passwort
+# in der Ausgabe des Laufs und damit in jedem Terminal-Protokoll.
+- name: Passwort des Repositories ablegen
+  ansible.builtin.copy:
+    dest: "{{ restic_passwort_datei }}"
+    content: "{{ restic_passwort }}"
+    mode: "0600"
+  no_log: true
+
+- name: Pruefen, ob das Repository schon angelegt ist
+  ansible.builtin.stat:
+    path: "{{ helios_restic_repo }}/config"
+  register: restic_config
+
+- name: Repository anlegen
+  ansible.builtin.command:
+    cmd: "restic init --repo {{ helios_restic_repo }}"
+  environment:
+    RESTIC_PASSWORD_FILE: "{{ restic_passwort_datei }}"
+  when: not restic_config.stat.exists
+  changed_when: true
+
+- name: Verzeichnis fuer eigene Programme
+  ansible.builtin.file:
+    path: "~/.local/bin"
+    state: directory
+    mode: "0755"
+
+- name: Sicherungsskript
+  ansible.builtin.template:
+    src: helios-sichern.j2
+    dest: "~/.local/bin/helios-sichern"
+    mode: "0755"
+
+- name: Verzeichnis fuer die Benutzer-Units
+  ansible.builtin.file:
+    path: "~/.config/systemd/user"
+    state: directory
+    mode: "0755"
+
+- name: Dienst und Timer fuer die Sicherung
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "~/.config/systemd/user/{{ item }}"
+    mode: "0644"
+  loop:
+    - helios-sichern.service
+    - helios-sichern.timer
+  notify: systemd neu einlesen
+
+- name: Handler jetzt ausfuehren
+  ansible.builtin.meta: flush_handlers
+
+# Nur der Timer wird aktiviert, nicht der Dienst: Der Dienst ist ein
+# oneshot und wird vom Timer gestartet - oder von Hand.
+- name: Timer aktivieren
+  ansible.builtin.systemd_service:
+    name: helios-sichern.timer
+    scope: user
+    enabled: true
+    state: started

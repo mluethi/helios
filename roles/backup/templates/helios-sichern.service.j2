@@ -1,0 +1,7 @@
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+[Unit]
+Description=Sicherung mit restic
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/helios-sichern

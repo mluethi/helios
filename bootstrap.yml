@@ -25,8 +25,14 @@
           die Container laufen rootless und gehoeren diesem Benutzer.
           Einzelne Aufgaben holen sich sudo selbst.
 
+  vars:
+    # Absoluter Pfad, weil ihn auch das Sicherungsskript und die systemd-Unit
+    # brauchen - dort expandiert keine Tilde.
+    restic_passwort_datei: "{{ ansible_env.HOME }}/.config/restic/passwort"
+
   roles:
     - basis
     - caddy
     - homepage
+    - backup
     - cli_tools

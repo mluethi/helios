@@ -34,6 +34,18 @@ helios_netzwerk: helios
 # Port, ab dem rootless Container lauschen duerfen. Caddy braucht 80.
 helios_port_start: 80
 
+# --- Sicherung ---------------------------------------------------------------
+#
+# Ziel ist vorerst die zweite Platte im Geraet selbst. Das ist KEIN richtiges
+# Backup - gegen Diebstahl, Feuer oder ein sterbendes Netzteil hilft es nicht.
+# Es ist das Ziel, an dem die Mechanik entsteht und der Rueckholtest geprobt
+# wird. Kommt eine externe Platte, aendert sich genau eine dieser Zeilen.
+#
+# UUID statt /dev/sda1: Geraetenamen koennen wandern, die UUID nicht.
+helios_backup_platte_uuid: 6aacdd60-be82-4d87-bbc7-40aed5e7327b
+helios_backup_einhaengepunkt: /data
+helios_restic_repo: /data/restic/helios
+
 # --- Geheimnisse -------------------------------------------------------------
 #
 # Verschluesselt mit ansible-vault. Das Passwort dazu liegt in ~/.vault_pass

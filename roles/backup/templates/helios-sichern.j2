@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+#
+# Dieses Skript wird vom Timer aufgerufen UND laesst sich von Hand starten.
+# Das ist Absicht: Der Rueckholtest soll denselben Weg nehmen wie die Sicherung,
+# sonst prueft er etwas anderes als das, worauf man sich verlaesst.
+set -euo pipefail
+
+export RESTIC_REPOSITORY="{{ helios_restic_repo }}"
+export RESTIC_PASSWORD_FILE="{{ restic_passwort_datei }}"
+
+# Ohne die Platte keine Sicherung - und das soll auffallen, statt still ins
+# Leere zu laufen. Ein Backup, das unbemerkt nichts tut, ist schlimmer als
+# keines: Es erzeugt Vertrauen, das nichts deckt.
+if ! mountpoint -q "{{ helios_backup_einhaengepunkt }}"; then
+    echo "FEHLER: {{ helios_backup_einhaengepunkt }} ist nicht eingehaengt." >&2
+    exit 1
+fi
+
+# Gesichert wird, was das Playbook NICHT wiederherstellen kann. Alles andere -
+# Caddyfile, Quadlets, Pakete, Firewall - liegt im Git und kommt beim naechsten
+# ansible-pull von selbst zurueck.
+#
+#   volumes/  : die Podman-Volumes, darin caddy-data mit der
+#               Zertifizierungsstelle. Geht sie verloren, muss das
+#               Wurzelzertifikat auf JEDEM Geraet neu importiert werden.
+#   homepage/ : die Konfiguration, die Homepage selbst anlegt und die von Hand
+#               gepflegt wird.
+echo "== Sichern =="
+restic backup --tag automatisch \
+    "$HOME/.local/share/containers/storage/volumes" \
+    "$HOME/homepage"
+
+echo "== Alte Staende ausduennen =="
+restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
+
+# Prueft die Struktur des Repositories, nicht den Inhalt der Daten. Das ist
+# billig und faengt Beschaedigungen frueh - ersetzt aber KEINEN Rueckholtest.
+echo "== Repository pruefen =="
+restic check

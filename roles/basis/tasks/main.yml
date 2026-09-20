@@ -20,6 +20,7 @@
       # falscher Name laesst dnf die ganze Liste abbrechen.
       - pcp
       - pcp-zeroconf                   # dichtere Messfolge, fertige Konfigs
+      - restic                         # Sicherung, siehe Rolle "backup"
     state: present
 
 - name: Cockpit aktivieren

@@ -1,0 +1,13 @@
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+[Unit]
+Description=Taegliche Sicherung mit restic
+
+[Timer]
+OnCalendar=daily
+# Holt einen verpassten Lauf nach, wenn die Maschine aus war. Ohne das faellt
+# die Sicherung an jedem Tag aus, an dem HELIOS nicht lief.
+Persistent=true
+RandomizedDelaySec=15m
+
+[Install]
+WantedBy=timers.target
