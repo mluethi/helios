@@ -30,13 +30,6 @@
     reverse_proxy homepage:3000
 }
 
-{{ helios_dienste_namen.backrest }} {
-    tls internal
-    # Backrest bringt eine eigene Anmeldung mit - beim ersten Aufruf wird ein
-    # Benutzer angelegt.
-    reverse_proxy backrest:9898
-}
-
 # --- Welle 2, sobald die Dienste laufen ---
 #
 # {{ helios_dienste_namen.forgejo }} {

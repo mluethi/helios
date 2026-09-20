@@ -1,8 +1,0 @@
----
-- name: Backrest neu starten
-  ansible.builtin.systemd_service:
-    name: backrest
-    scope: user
-    state: restarted
-  # Beim allerersten Lauf gibt es die Unit noch nicht - dann ist das kein Fehler.
-  failed_when: false
