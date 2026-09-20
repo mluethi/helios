@@ -28,7 +28,11 @@
   vars:
     # Absoluter Pfad, weil ihn auch das Sicherungsskript und die systemd-Unit
     # brauchen - dort expandiert keine Tilde.
-    restic_passwort_datei: "{{ ansible_env.HOME }}/.config/restic/passwort"
+    #
+    # ansible_facts['env'] statt ansible_env, aus demselben Grund wie unten bei
+    # user_id: Das automatische Einspeisen der Fakten als Variablen mit Praefix
+    # (INJECT_FACTS_AS_VARS) faellt in ansible-core 2.24 weg.
+    restic_passwort_datei: "{{ ansible_facts['env']['HOME'] }}/.config/restic/passwort"
 
   roles:
     - basis
