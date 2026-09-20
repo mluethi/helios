@@ -33,3 +33,34 @@ helios_netzwerk: helios
 
 # Port, ab dem rootless Container lauschen duerfen. Caddy braucht 80.
 helios_port_start: 80
+
+# --- Geheimnisse -------------------------------------------------------------
+#
+# Verschluesselt mit ansible-vault. Das Passwort dazu liegt in ~/.vault_pass
+# (Rechte 0600) und zusaetzlich im Passwortspeicher - ohne Kopie ausserhalb von
+# HELIOS waeren diese Werte verloren, wenn die Maschine es ist.
+#
+# Einzelne Werte statt ganzer Dateien: So bleibt sichtbar, WELCHE Geheimnisse es
+# gibt und wie sie heissen - nur die Werte sind Chiffre, und die Git-Historie
+# bleibt lesbar.
+#
+# Neuen Wert anlegen:
+#   p=$(openssl rand -base64 32)
+#   printf '%s' "$p" | ansible-vault encrypt_string --stdin-name 'name'
+#   unset p
+# printf '%s' ohne \n ist Absicht: encrypt_string verschluesselt exakt, was
+# ankommt - EINSCHLIESSLICH eines Zeilenumbruchs. Die Passwortdatei wird von
+# Ansible bereinigt, die Eingabe hier nicht. Dieselbe Sorte Wert, zwei Regeln.
+
+# Passwort des restic-Repositories. Angelegt am 19.09.2026, bevor es ein
+# Repository gibt: Es muss existieren, bevor eines angelegt wird, und gehoert
+# ohnehin in den Passwortspeicher. Geht es verloren, sind alle Sicherungen
+# unlesbar - dasselbe gilt fuer Backups wie fuer die Zertifizierungsstelle.
+restic_passwort: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          62383635373866323764653765623965306266326636653932613537326532623863616530633266
+          6366333132326366396462316263366532623434613265640a396634396631666438303935383038
+          63643536306634343163343636643536626234383861323636633037313564376137366337383233
+          6361386538353662320a366539613731663433653031313539333437656131333634366262633331
+          33313936386661386563623138313232393566343063376636663935393365643161393031376137
+          6635353266373765333031336335613966626334356666616562
