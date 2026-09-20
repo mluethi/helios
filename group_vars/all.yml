@@ -13,6 +13,7 @@ helios_dienste_namen:
   forgejo: forgejo.rubi
   vaultwarden: vault.rubi
   arcane: arcane.rubi
+  backrest: backup.rubi
 
 # Container-Images, exakt festgenagelt. Ein Neuaufbau soll dieselbe Maschine
 # ergeben und nicht nur eine aehnliche - darum geht es in Durchgang 2.
@@ -27,6 +28,7 @@ helios_dienste_namen:
 helios_images:
   caddy: docker.io/library/caddy:2.11.4
   homepage: ghcr.io/gethomepage/homepage:v2.4.0
+  backrest: ghcr.io/garethgeorge/backrest:v1.14.1
 
 # Podman-Netzwerk, ueber das sich die Container spaeter beim Namen finden.
 helios_netzwerk: helios
@@ -44,7 +46,10 @@ helios_port_start: 80
 # UUID statt /dev/sda1: Geraetenamen koennen wandern, die UUID nicht.
 helios_backup_platte_uuid: 6aacdd60-be82-4d87-bbc7-40aed5e7327b
 helios_backup_einhaengepunkt: /data
-helios_restic_repo: /data/restic/helios
+# Das Verzeichnis ueber dem Repository - Backrest bekommt es schreibgeschuetzt
+# eingehaengt und sieht damit auch kuenftige Repositories darin.
+helios_restic_verzeichnis: /data/restic
+helios_restic_repo: "{{ helios_restic_verzeichnis }}/helios"
 
 # --- Geheimnisse -------------------------------------------------------------
 #

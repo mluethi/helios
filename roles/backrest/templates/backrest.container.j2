@@ -1,0 +1,47 @@
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+#
+# Backrest ist ein FENSTER auf die Sicherungen, kein Werkzeug. Gesichert wird
+# vom systemd-Timer aus der Rolle "backup"; hier wird nur hineingeschaut.
+#
+# Sein eigener Zustand (Repository-Definition, Passwort, Ansichten) liegt in
+# seinen Volumes und nicht im Playbook. Das ist hier vertretbar, weil NICHTS
+# davon abhaengt: Geht die Konfiguration verloren, bindet man das Repository
+# neu ein und es ist nichts kaputt. Bei Arcane ist das anders - dessen
+# Handlungen veraendern das echte System.
+[Unit]
+Description=Backrest - Fenster auf die restic-Sicherungen
+After=network-online.target
+
+[Container]
+Image={{ helios_images.backrest }}
+ContainerName=backrest
+# Kein PublishPort: erreichbar nur ueber Caddy.
+Network={{ helios_netzwerk }}.network
+
+# Eigener Zustand von Backrest.
+Volume=backrest-config:/config:Z
+Volume=backrest-data:/backrest-data:Z
+Volume=backrest-cache:/cache:Z
+
+# Das Repository, SCHREIBGESCHUETZT. So ist "nur schauen" erzwungen und nicht
+# bloss vereinbart - ein Fehlgriff in der Oberflaeche kann die Sicherungen
+# nicht antasten.
+#
+# ACHTUNG, bewusst OHNE :Z oder :z. Diese SELinux-Schalter kennzeichnen den
+# Pfad fuer den Container um - und /data/restic benutzt auch der Timer auf dem
+# Host. Wer einen gemeinsam genutzten Pfad umkennzeichnet, macht ihn fuer den
+# anderen unbrauchbar. Sollte SELinux den Zugriff verweigern, ist :z (klein,
+# gemeinsam) der naechste Versuch, niemals :Z.
+Volume={{ helios_restic_verzeichnis }}:/repos:ro
+
+Environment=BACKREST_PORT=0.0.0.0:9898
+Environment=BACKREST_DATA=/backrest-data
+Environment=BACKREST_CONFIG=/config/config.json
+Environment=XDG_CACHE_HOME=/cache
+Environment=TZ=Europe/Zurich
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=default.target
