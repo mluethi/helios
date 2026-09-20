@@ -38,3 +38,9 @@ restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
 # billig und faengt Beschaedigungen frueh - ersetzt aber KEINEN Rueckholtest.
 echo "== Repository pruefen =="
 restic check
+
+# Zum Schluss der Stand, damit er im Journal landet. Cockpit zeigt das Protokoll
+# des Timers an - damit steht die Liste der Schnappschuesse dort, ohne dass es
+# dafuer eine eigene Oberflaeche braucht.
+echo "== Stand =="
+restic snapshots

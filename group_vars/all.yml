@@ -12,7 +12,6 @@ helios_dienste_namen:
   # Welle 2, Host-Overrides am 19.09.2026 angelegt, Dienste noch nicht gebaut:
   forgejo: forgejo.rubi
   vaultwarden: vault.rubi
-  arcane: arcane.rubi
 
 # Container-Images, exakt festgenagelt. Ein Neuaufbau soll dieselbe Maschine
 # ergeben und nicht nur eine aehnliche - darum geht es in Durchgang 2.

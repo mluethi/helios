@@ -204,7 +204,10 @@
       vault_password_file = ~/.vault_pass
     mode: "0644"
 
-# Der Socket wird von Arcane gebraucht (Welle 2) und schadet vorher nicht.
+# Den Socket braucht cockpit-podman: Es spricht Podman ueber dessen
+# REST-Schnittstelle an. Urspruenglich stand hier "fuer Arcane (Welle 2)" -
+# Arcane ist mit F-11 entfallen, der Socket bleibt. Beim Ausbauen eines Dienstes
+# lohnt der Blick, wer seine Voraussetzungen sonst noch benutzt.
 - name: Podman-Socket des Benutzers aktivieren
   ansible.builtin.systemd_service:
     name: podman.socket
