@@ -26,8 +26,17 @@ fi
 #               Wurzelzertifikat auf JEDEM Geraet neu importiert werden.
 #   homepage/ : die Konfiguration, die Homepage selbst anlegt und die von Hand
 #               gepflegt wird.
+# Ausgenommen: die Volumes von Backrest. Es ist ein Fenster auf die
+# Sicherungen, sein Zustand ist Ansicht und Protokoll - nichts haengt davon ab,
+# und seine Datenbank waechst mit jedem Vorgang. Sie mitzusichern hiesse, die
+# Sicherung ueber sich selbst Buch fuehren zu lassen.
+#
+# Bewusst als Ausnahme und nicht als Aufzaehlung der gewuenschten Volumes:
+# So sind kuenftige Dienste von selbst dabei. Zuviel zu sichern ist der
+# harmlosere Fehler.
 echo "== Sichern =="
 restic backup --tag automatisch \
+    --exclude "$HOME/.local/share/containers/storage/volumes/backrest-*" \
     "$HOME/.local/share/containers/storage/volumes" \
     "$HOME/homepage"
 
