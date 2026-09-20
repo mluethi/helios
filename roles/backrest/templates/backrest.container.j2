@@ -20,22 +20,27 @@ Network={{ helios_netzwerk }}.network
 
 # Eigener Zustand von Backrest.
 Volume=backrest-config:/config:Z
-Volume=backrest-data:/backrest-data:Z
+Volume=backrest-data:/data:Z
 Volume=backrest-cache:/cache:Z
 
 # Das Repository, SCHREIBGESCHUETZT. So ist "nur schauen" erzwungen und nicht
 # bloss vereinbart - ein Fehlgriff in der Oberflaeche kann die Sicherungen
 # nicht antasten.
 #
-# ACHTUNG, bewusst OHNE :Z oder :z. Diese SELinux-Schalter kennzeichnen den
-# Pfad fuer den Container um - und /data/restic benutzt auch der Timer auf dem
-# Host. Wer einen gemeinsam genutzten Pfad umkennzeichnet, macht ihn fuer den
-# anderen unbrauchbar. Sollte SELinux den Zugriff verweigern, ist :z (klein,
-# gemeinsam) der naechste Versuch, niemals :Z.
-Volume={{ helios_restic_verzeichnis }}:/repos:ro
+# Zu den beiden SELinux-Schaltern, und der Unterschied ist hier entscheidend:
+#
+#   :Z  kennzeichnet den Pfad EXKLUSIV fuer diesen Container. Auf einem Pfad,
+#       den auch der Host benutzt, ist das ein Fehler - der Timer auf dem Host
+#       kaeme danach nicht mehr an sein eigenes Repository.
+#   :z  kennzeichnet ihn GEMEINSAM. Mehrere Container und der Host duerfen.
+#
+# Am 20.09.2026 zunaechst ganz ohne Schalter versucht - dann kommt der
+# Container gar nicht hinein ("Permission denied"). Also :z, und danach GEPRUEFT,
+# dass das Sicherungsskript auf dem Host weiterhin laeuft.
+Volume={{ helios_restic_verzeichnis }}:/repos:ro,z
 
 Environment=BACKREST_PORT=0.0.0.0:9898
-Environment=BACKREST_DATA=/backrest-data
+Environment=BACKREST_DATA=/data
 Environment=BACKREST_CONFIG=/config/config.json
 Environment=XDG_CACHE_HOME=/cache
 Environment=TZ=Europe/Zurich
