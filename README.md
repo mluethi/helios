@@ -50,14 +50,26 @@ Geheimnisse. Ab Welle 2 (Forgejo, VaultWarden) kommt `--ask-vault-pass` dazu.
 |---|---|---|
 | `basis` | root | Pakete, `net.ipv4.ip_unprivileged_port_start=80`, `loginctl enable-linger`, `podman.socket`, Cockpit hinter dem Proxy |
 | `caddy` | marcello | Podman-Netzwerk, Caddy-Quadlet, Caddyfile mit `tls internal` |
-| `cli_tools` | root | `mc`, `bat`, `fzf`, `zoxide`, `yadm`, `direnv` |
+| `homepage` | marcello | Startseite als Quadlet, erreichbar über `home.rubi` |
+| `backup` | beide | Platte nach `/data`, restic-Repository, täglicher Timer |
+| `cli_tools` | root | `mc`, `bat`, `fzf`, `zoxide`, `chezmoi`, `direnv` |
 
-Das ist **Welle 1**. Forgejo, VaultWarden, Homepage und Arcane (Welle 2) sowie
-Semaphore und der Pi-Agent (Welle 3) kommen später dazu.
+Das ist **Welle 1**, seit dem 20.09.2026 vollständig – einschliesslich Backup
+und `ansible-vault`, die beide zuerst gefehlt hatten. Aus **Welle 2** läuft
+Homepage; Forgejo und VaultWarden folgen. Semaphore und der Pi-Agent sind
+Welle 3.
 
-**Backup fehlt noch** und gehört eigentlich in Welle 1 – sobald Forgejo läuft,
-liegt Code auf dieser Maschine. Offen, weil das Ziel noch nicht feststeht
-(F-15 im Planungsrepository).
+**Arcane ist entfallen** (F-11 im Planungsrepository): Es spricht die
+Docker-API und sieht keine Quadlets – damit zeigt es dauerhaft ein
+unvollständiges Bild. `cockpit-podman` deckt den Bedarf, ist paketiert und
+pflegt sich mit dem System.
+
+**Das Backup** sichert, was dieses Playbook *nicht* wiederherstellen kann: die
+Podman-Volumes mit Caddys Zertifizierungsstelle und die Konfiguration von
+Homepage. Alles Übrige liegt in Git. Ziel ist vorerst die zweite Platte im
+Gerät – kein richtiges Backup, aber das Ziel, an dem die Mechanik entstand und
+der Rückholtest geprobt wurde. Eine externe Platte ist eine Zeile in
+`group_vars` (F-15).
 
 ## Grundsätze
 
@@ -67,9 +79,14 @@ nachladen muss, ist ein Bootstrap, der beim Wiederherstellen scheitert. Dafür
 wird die sysctl-Datei von Hand geschrieben statt über ein Modul.
 
 **Quadlets sind die Wahrheit.** Container werden ausschliesslich über die
-`.container`-Dateien in diesem Repo verwaltet. Wer in Arcane oder Cockpit einen
-Container startet, erzeugt ihn *neben* dieser Welt – ohne systemd-Unit, ohne
-Git, ohne Neustart-Überleben. Arcane ist ein Fenster, kein Werkzeug.
+`.container`-Dateien in diesem Repo verwaltet. Wer in Cockpit einen Container
+startet, erzeugt ihn *neben* dieser Welt – ohne systemd-Unit, ohne Git, ohne
+Neustart-Überleben, und beim nächsten `ansible-pull` weiss niemand davon.
+
+**`cockpit-podman` ist ein Fenster, kein Werkzeug.** Draufschauen ja, damit
+arbeiten nein. Dieselbe Regel galt für Arcane, bevor es entfiel – sie hängt
+nicht am Werkzeug, sondern daran, dass es zwei Wege gäbe, dasselbe zu tun, und
+nur einer davon im Git steht.
 
 **Keine Geheimnisse im Klartext.** Dieses Repo ist öffentlich. Passwörter,
 Token und Schlüssel gehören in `ansible-vault`, nichts davon unverschlüsselt in
