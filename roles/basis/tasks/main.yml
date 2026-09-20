@@ -8,6 +8,16 @@
       - podman
       - cockpit
       - cockpit-podman
+      # Dateibrowser in der Weboberflaeche. Bewusst die einzige zusaetzliche
+      # Cockpit-Erweiterung: Der Preis einer Erweiterung ist nicht
+      # Plattenplatz, sondern Aufmerksamkeit - jede ist ein Menueeintrag mehr,
+      # den man beim Suchen ueberspringt.
+      #
+      # cockpit-machines kommt mit Durchgang 2 dazu (Kickstart in einer VM
+      # durchspielen) und zieht libvirt und qemu nach sich. cockpit-sosreport
+      # schnuert Berichte fuer einen Red-Hat-Supportfall - ohne Vertrag ein
+      # Knopf, den nie jemand drueckt.
+      - cockpit-files
       - git-core
       - policycoreutils-python-utils   # semanage, fuer SELinux-Probleme
       - tmux
