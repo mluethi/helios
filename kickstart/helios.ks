@@ -1,4 +1,4 @@
-# Fedora Server 44 - HELIOS
+# Fedora Server 44 - Helios
 #
 # DURCHGANG 2. Erst benutzen, wenn Durchgang 1 steht und die Werte unten
 # bekannt sind. Vorher pruefen:

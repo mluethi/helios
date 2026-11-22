@@ -1,4 +1,4 @@
-# HELIOS
+# Helios
 
 Der zentrale Setup-Server des Rubitopia-Homelabs: **Fedora Server, Podman
 rootless, Dienste als Quadlets.**
@@ -26,7 +26,7 @@ dieses Playbook laufen lassen. Hier liegt der Wert.
 
 **Durchgang 2 – Kickstart.** Erst danach, und nur wenn sich der Weg bewährt
 hat. `kickstart/helios.ks` wird dann mit den echten Werten gefüllt und in einer
-VM auf HELIOS selbst durchgespielt.
+VM auf Helios selbst durchgespielt.
 
 ## Bootstrap
 
@@ -92,8 +92,8 @@ nur einer davon im Git steht.
 Token und Schlüssel gehören in `ansible-vault`, nichts davon unverschlüsselt in
 eine Datei.
 
-**Dieses Repo bleibt auf GitHub**, auch wenn Forgejo auf HELIOS läuft. Stirbt
-HELIOS, stirbt sonst das Repo mit, aus dem HELIOS wiederhergestellt wird.
+**Dieses Repo bleibt auf GitHub**, auch wenn Forgejo auf Helios läuft. Stirbt
+Helios, stirbt sonst das Repo mit, aus dem Helios wiederhergestellt wird.
 Forgejo bekommt eine Spiegelung, nicht das Original.
 
 ## Nach einer Änderung an einem Quadlet
@@ -105,7 +105,7 @@ systemctl --user restart caddy
 
 ## Die Zertifikate
 
-Caddy betreibt eine eigene CA auf HELIOS (`tls internal`). Damit der Mac keine
+Caddy betreibt eine eigene CA auf Helios (`tls internal`). Damit der Mac keine
 Warnung zeigt, muss deren Wurzelzertifikat einmal importiert werden:
 
 ```bash

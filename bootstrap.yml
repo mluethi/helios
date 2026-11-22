@@ -6,7 +6,7 @@
 # -K fragt nach dem sudo-Passwort. Die Podman-Aufgaben laufen bewusst ohne
 # sudo: die Container sind rootless und gehoeren dem Benutzer.
 
-- name: HELIOS einrichten (Welle 1)
+- name: Helios einrichten (Welle 1)
   hosts: localhost
   connection: local
   gather_facts: true

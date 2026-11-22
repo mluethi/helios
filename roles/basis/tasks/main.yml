@@ -71,7 +71,7 @@
 # "Online" soll heissen: Das Kabel hat Verbindung und die Adresse ist da.
 # NetworkManager wartet beim Start nur 6 s auf das Signal am Kabel und meldet
 # danach "startup complete" - auch wenn das Kabel erst spaeter kommt. Bei
-# HELIOS kam es am 22.11.2026 rund 20 s nach dem Erscheinen von eno1
+# Helios kam es am 22.11.2026 rund 20 s nach dem Erscheinen von eno1
 # (10:22:53 erschienen, 10:23:00 "online", 10:23:14 Kabel und Adresse).
 #
 # Die Folge war eine 502 auf helios.rubi: Podman wartet zwar auf
@@ -80,7 +80,7 @@
 # Podman neu startet. Dasselbe trifft alles, was spaeter auf das Netz wartet.
 #
 # 45 s statt 6 s: mehr als das Doppelte des Gemessenen. Preis: Ohne Kabel
-# startet HELIOS bis zu 45 s langsamer, und ein gezogenes Kabel bemerkt
+# startet Helios bis zu 45 s langsamer, und ein gezogenes Kabel bemerkt
 # NetworkManager erst nach 45 s. Fuer einen Server am Kabel vertretbar.
 # Gilt fuer jede Ethernet-Schnittstelle - im Repo steht bewusst kein
 # Schnittstellenname. Wirkt ab dem naechsten Start.
@@ -130,7 +130,7 @@
 # cockpit und dhcpv6-client durch. Caddy horcht zwar auf 80 und 443, aber von
 # aussen kommt nichts an - auf der Maschine selbst laeuft der Verkehr ueber die
 # Loopback-Schnittstelle und wird nicht gefiltert. Deshalb funktionierte curl
-# auf HELIOS und der Browser vom Mac nicht (18.09.2026).
+# auf Helios und der Browser vom Mac nicht (18.09.2026).
 #
 # ansible.posix.firewalld waere das passende Modul, steckt aber in einer
 # Galaxy-Collection - siehe ansible.cfg. Also firewall-cmd von Hand, idempotent

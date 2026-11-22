@@ -1,4 +1,4 @@
-# HELIOS richtet sich selbst ein - ansible-pull laeuft lokal.
+# Helios richtet sich selbst ein - ansible-pull laeuft lokal.
 all:
   hosts:
     localhost:

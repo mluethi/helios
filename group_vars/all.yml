@@ -1,5 +1,5 @@
 ---
-# Grundwerte fuer HELIOS. Keine Geheimnisse - dieses Repo ist oeffentlich.
+# Grundwerte fuer Helios. Keine Geheimnisse - dieses Repo ist oeffentlich.
 
 helios_benutzer: marcello
 helios_hostname: helios.rubi
@@ -51,7 +51,7 @@ helios_restic_repo: "{{ helios_restic_verzeichnis }}/helios"
 #
 # Verschluesselt mit ansible-vault. Das Passwort dazu liegt in ~/.vault_pass
 # (Rechte 0600) und zusaetzlich im Passwortspeicher - ohne Kopie ausserhalb von
-# HELIOS waeren diese Werte verloren, wenn die Maschine es ist.
+# Helios waeren diese Werte verloren, wenn die Maschine es ist.
 #
 # Einzelne Werte statt ganzer Dateien: So bleibt sichtbar, WELCHE Geheimnisse es
 # gibt und wie sie heissen - nur die Werte sind Chiffre, und die Git-Historie
