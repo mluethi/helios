@@ -41,7 +41,12 @@ helios_port_start: 80
 # wird. Kommt eine externe Platte, aendert sich genau eine dieser Zeilen.
 #
 # UUID statt /dev/sda1: Geraetenamen koennen wandern, die UUID nicht.
-helios_backup_platte_uuid: 6aacdd60-be82-4d87-bbc7-40aed5e7327b
+#
+# Seit 22.11.2026 die Samsung 870 QVO im NUC (nuc11-d6r), auf den Helios
+# umzieht. Vorher 6aacdd60-be82-4d87-bbc7-40aed5e7327b, die SSD im ProDesk -
+# dort darum kein ansible-pull mehr, sonst kaeme ein zweiter fstab-Eintrag
+# fuer eine Platte dazu, die es dort nicht gibt.
+helios_backup_platte_uuid: cd8e0cf8-5790-4a2c-a3fc-1d73e90fe94a
 helios_backup_einhaengepunkt: /data
 # Das Verzeichnis ueber dem Repository.
 helios_restic_verzeichnis: /data/restic
