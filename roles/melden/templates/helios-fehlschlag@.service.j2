@@ -1,0 +1,10 @@
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+#
+# Gestartet von OnFailure= einer Aufgabe, nie von Hand aktiviert. %i ist der
+# Name der Aufgabe, etwa helios-sichern.
+[Unit]
+Description=Fehlschlag von %i an Healthchecks.io melden
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/helios-melden %i fail

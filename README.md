@@ -41,8 +41,10 @@ ansible-pull -U https://github.com/mluethi/helios.git bootstrap.yml -K
 und die Cockpit-Konfiguration. Alles rund um Podman läuft **ohne** `sudo`, weil
 die Container rootless unter `marcello` laufen.
 
-**Ein Vault-Passwort braucht es in Welle 1 noch nicht** – es gibt noch keine
-Geheimnisse. Ab Welle 2 (Forgejo, VaultWarden) kommt `--ask-vault-pass` dazu.
+**Vorher muss `~/.vault_pass` da sein** (Rechte `0600`, Kopie im
+Passwortspeicher) – sonst bricht der Lauf ab. Die Geheimnisse in
+`group_vars/all.yml` sind mit `ansible-vault` verschlüsselt: das Passwort von
+restic und der Ping-Schlüssel von Healthchecks.io.
 
 ## Was das Playbook tut
 
@@ -51,7 +53,8 @@ Geheimnisse. Ab Welle 2 (Forgejo, VaultWarden) kommt `--ask-vault-pass` dazu.
 | `basis` | root | Pakete, `net.ipv4.ip_unprivileged_port_start=80`, `loginctl enable-linger`, `podman.socket`, Cockpit hinter dem Proxy |
 | `caddy` | marcello | Podman-Netzwerk, Caddy-Quadlet, Caddyfile mit `tls internal` |
 | `homepage` | marcello | Startseite als Quadlet, erreichbar über `home.rubi` |
-| `backup` | beide | Platte nach `/data`, restic-Repository, täglicher Timer |
+| `melden` | marcello | `helios-melden` und `helios-fehlschlag@.service`: Start, Erfolg und Fehlschlag an Healthchecks.io |
+| `backup` | beide | Platte nach `/data`, restic-Repository, täglicher Timer, meldet an Healthchecks.io |
 | `cli_tools` | root | `mc`, `bat`, `fzf`, `zoxide`, `chezmoi`, `direnv` |
 
 Das ist **Welle 1**, seit dem 20.09.2026 vollständig – einschliesslich Backup
@@ -70,6 +73,12 @@ Homepage. Alles Übrige liegt in Git. Ziel ist vorerst die zweite Platte im
 Gerät – kein richtiges Backup, aber das Ziel, an dem die Mechanik entstand und
 der Rückholtest geprobt wurde. Eine externe Platte ist eine Zeile in
 `group_vars` (F-15).
+
+**Die Meldungen** gehen an Healthchecks.io, je Aufgabe ein Check mit dem Namen
+der systemd-Unit als Slug (`helios-sichern`). Healthchecks.io meldet sich bei
+einem Fehlschlag **und** wenn die Erfolgsmeldung ausbleibt – etwa weil Helios
+aus ist – und schickt weiter an ntfy und per Mail. Eine Aufgabe anschliessen:
+drei Zeilen in ihrer Unit, beschrieben in `roles/melden/tasks/main.yml`.
 
 ## Grundsätze
 
@@ -125,6 +134,9 @@ ansible.cfg
 group_vars/all.yml     Variablen (Hostname, Benutzer, Ports)
 roles/basis/           System: Pakete, sysctl, linger, Cockpit
 roles/caddy/           Reverse Proxy als Quadlet
+roles/homepage/        Startseite als Quadlet
+roles/melden/          Meldungen an Healthchecks.io
+roles/backup/          Sicherung mit restic, Timer
 roles/cli_tools/       Werkzeuge fuer die Kommandozeile
 kickstart/helios.ks    Durchgang 2 – noch mit Platzhaltern
 ```

@@ -1,0 +1,67 @@
+---
+# Meldungen an Healthchecks.io: Start, Erfolg und Fehlschlag der Aufgaben, die
+# Helios nachts selbst erledigt. Entschieden am 24.11.2026 (F-116 im
+# Homelab-Repo).
+#
+# Warum ueber Healthchecks.io und nicht direkt an ntfy: Ein Fehlschlag, den
+# Helios selbst meldet, deckt nur Fehler, die eintreten. Laeuft die Aufgabe gar
+# nicht - Helios aus, Timer kaputt, Netz weg -, bleibt es still. Healthchecks.io
+# erwartet die Erfolgsmeldung und meldet sich auch, wenn sie AUSBLEIBT. Weiter
+# geht es von dort ueber zwei Wege, ntfy und Mail.
+#
+# Jede Aufgabe ist ein eigener Check, angesprochen ueber den Ping-Schluessel des
+# Projekts und den Namen der systemd-Unit als Slug (helios-sichern, ...). So
+# liegt auf Helios ein einziges Geheimnis, egal wie viele Aufgaben dazukommen.
+#
+# Eine Aufgabe anschliessen - drei Zeilen in ihrer .service-Unit:
+#   [Unit]
+#   OnFailure=helios-fehlschlag@%N.service
+#   [Service]
+#   ExecStartPre=-%h/.local/bin/helios-melden %N start
+#   ExecStartPost=-%h/.local/bin/helios-melden %N
+# Und bei Healthchecks.io einen Check mit genau diesem Slug anlegen - von Hand,
+# nicht mit ?create=1: Ein selbst angelegter Check kennt weder den Zeitplan noch
+# die Wege, und er meldet sich dann zur falschen Zeit oder gar nicht.
+
+- name: Verzeichnis fuer die Einstellungen von Helios
+  ansible.builtin.file:
+    path: "~/.config/helios"
+    state: directory
+    mode: "0700"
+
+# no_log: true ist Pflicht - sonst stuende der Schluessel in der Ausgabe des
+# Laufs. Wer ihn kennt, kann Erfolg melden, wo keiner war.
+- name: Ping-Schluessel von Healthchecks.io ablegen
+  ansible.builtin.copy:
+    dest: "~/.config/helios/healthchecks-ping-key"
+    content: "{{ healthchecks_ping_key }}"
+    mode: "0600"
+  no_log: true
+
+- name: Verzeichnis fuer eigene Programme
+  ansible.builtin.file:
+    path: "~/.local/bin"
+    state: directory
+    mode: "0755"
+
+- name: Meldeskript
+  ansible.builtin.template:
+    src: helios-melden.j2
+    dest: "~/.local/bin/helios-melden"
+    mode: "0755"
+
+- name: Verzeichnis fuer die Benutzer-Units
+  ansible.builtin.file:
+    path: "~/.config/systemd/user"
+    state: directory
+    mode: "0755"
+
+# Eine Vorlage fuer alle Aufgaben: helios-fehlschlag@helios-sichern.service
+# meldet den Fehlschlag von helios-sichern. Wird nie aktiviert, nur von
+# OnFailure= gestartet.
+- name: Unit fuer Fehlschlaege
+  ansible.builtin.template:
+    src: helios-fehlschlag@.service.j2
+    dest: "~/.config/systemd/user/helios-fehlschlag@.service"
+    mode: "0644"
+  notify: systemd neu einlesen

@@ -1,7 +1,19 @@
 # Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+#
+# Start, Erfolg und Fehlschlag gehen an Healthchecks.io, Check "helios-sichern"
+# (Rolle melden). Das "-" vor den Meldungen ist Absicht: Faellt nur die Meldung
+# aus, ist die Sicherung trotzdem gelungen - und Healthchecks.io bemerkt das
+# Ausbleiben selbst.
+#
+# Die Meldungen haengen an der Unit, nicht am Skript: Wer helios-sichern von
+# Hand aufruft, meldet nichts. Mit "systemctl --user start helios-sichern"
+# geht es denselben Weg wie in der Nacht.
 [Unit]
 Description=Sicherung mit restic
+OnFailure=helios-fehlschlag@%N.service
 
 [Service]
 Type=oneshot
+ExecStartPre=-%h/.local/bin/helios-melden %N start
 ExecStart=%h/.local/bin/helios-sichern
+ExecStartPost=-%h/.local/bin/helios-melden %N

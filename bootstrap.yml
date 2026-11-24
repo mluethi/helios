@@ -38,5 +38,8 @@
     - basis
     - caddy
     - homepage
+    # melden vor backup: Die Sicherung braucht helios-melden und die Unit
+    # fuer Fehlschlaege.
+    - melden
     - backup
     - cli_tools

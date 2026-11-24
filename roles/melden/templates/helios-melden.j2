@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Von Ansible erzeugt - Aenderungen hier gehen beim naechsten Lauf verloren.
+#
+#   helios-melden <aufgabe>          Erfolg
+#   helios-melden <aufgabe> start    Beginn - Healthchecks.io misst damit die
+#                                    Dauer und meldet, wenn sie zu lang wird
+#   helios-melden <aufgabe> fail     Fehlschlag
+#
+# <aufgabe> ist der Slug des Checks bei Healthchecks.io, gleich dem Namen der
+# systemd-Unit (helios-sichern).
+#
+# Ein eigenes Skript statt curl direkt in der Unit: So steht der Schluessel nie
+# in einer Befehlszeile - nicht in "systemctl status", nicht im Journal.
+#
+# Keine Inhalte mitschicken. Healthchecks.io bekaeme sonst Pfade, Dateinamen und
+# Fehlertexte; was schiefging, steht im Journal von Helios.
+set -euo pipefail
+
+aufgabe="${1:?Aufgabe fehlt, etwa: helios-melden helios-sichern}"
+signal="${2:-}"
+
+case "$signal" in
+    ""|start|fail) ;;
+    *) echo "Unbekanntes Signal: $signal (erlaubt: start, fail)" >&2; exit 2 ;;
+esac
+
+schluessel="$(< "$HOME/.config/helios/healthchecks-ping-key")"
+
+# --retry: kurze Aussetzer im Netz ueberbruecken. -m: nie laenger als 10 s je
+# Versuch haengen - die Meldung darf die Aufgabe nicht aufhalten.
+if ! curl -fsS -m 10 --retry 5 -o /dev/null \
+        "https://hc-ping.com/${schluessel}/${aufgabe}${signal:+/$signal}"; then
+    echo "Meldung an Healthchecks.io fehlgeschlagen: ${aufgabe} ${signal:-erfolg}" >&2
+    exit 1
+fi
